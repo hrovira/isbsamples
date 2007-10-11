@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.sqldb.jdbc.SomeDriver"/>
+        <property name="url" value="jdbc:sqldb://localhost:1414"/>
+        <property name="username" value="joe"/>
+        <property name="password" value="mybirthday"/>
+    </bean>
+
+    <bean id="prototype-JdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" scope="prototype">
+        <constructor-arg index="0" ref="dataSource"/>
+    </bean>
+
+    <bean id="myService3" class="org.isb.sample.MyService3">
+        <property name="jdbcTemplate" ref="prototype-JdbcTemplate"/>
+        <!--<property name="jdbcTemplate">-->
+            <!--<bean class="org.springframework.jdbc.core.JdbcTemplate">-->
+                <!--<constructor-arg ref="dataSource"/>-->
+            <!--</bean>-->
+        <!--</property>-->
+    </bean>
+
+    <bean id="myService4" class="org.isb.sample.MyService4">
+        <property name="jdbcTemplate" ref="prototype-JdbcTemplate"/>
+        <property name="sqlProvider">
+            <bean class="org.isb.sample.MySqlProvider">
+                <property name="sqlToProvide" value="SELECT ID, LABEL FROM FOO_TABLE"/>
+            </bean>
+        </property>
+        <property name="foosResultSetExtractor">
+            <bean class="com.mits.common.factories.springframework.BeanFactoryAwareReferenceInstanceFactory">
+                <property name="referenceMethodName" value="setFoos"/>
+                <property name="targetBeanName" value="myResultSetExtractor"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="myService5" class="org.isb.sample.MyService5">
+        <property name="jdbcTemplate" ref="prototype-JdbcTemplate"/>
+        <property name="excludedId" value="1234"/>
+    </bean>
+
+    <bean id="myResultSetExtractor" class="org.isb.sample.MyResultSetExtractor"/>
+</beans>
